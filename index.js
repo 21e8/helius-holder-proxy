@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3002;
 const dotenv = require("dotenv");
 dotenv.config();
 app.use(
@@ -29,8 +29,6 @@ const config = {
  * @property {number} delegated_amount
  * @property {boolean} frozen
  */
-const bodenToken = "3psH1Mj1f7yUfaD5gh6Zj7epE8hhrMkMETgv5TshQA4o";
-const trempToken = "FU1q8vJpZNUrmqsciSjp8bAKKidGsLmouB8CBdf8TKQv";
 const rpcUrl = process.env.RPC_URL || "https://api.mainnet-beta.solana.com";
 const holders = {
   [config.aDescriptor]: 0,
@@ -41,13 +39,13 @@ const holders = {
  * @param {'boden' | 'tremp'} key
  * @returns {Map<string, TokenAccount>}
  */
-const findHolders = async (key) => {
+const findHolders = async (address) => {
   let page = 1;
   let allOwners = new Map();
-  const address = key === config.aDescriptor ? config.aMint : config.bMint;
-
+  console.log(address);
   try {
     while (true) {
+      console.log('page ', page);
       const response = await fetch(rpcUrl, {
         method: "POST",
         headers: {
@@ -98,18 +96,18 @@ app.get("/get-holders", (req, res) => {
   return res.send({ holders: holders });
 });
 const fetchAccounts = async () => {
-  await findHolders(config.aDescriptor).then((data) => {
+  await findHolders(config.aMint).then((data) => {
     holders[config.aDescriptor] = data;
   });
-  await findHolders(config.bDescriptor).then((data) => {
+  await findHolders(config.bMint).then((data) => {
     holders[config.bDescriptor] = data;
   });
 };
 setInterval(() => {
   fetchAccounts();
 }, 1000 * 60 * 10);
-fetchAccounts();
 
 app.listen(port, () => {
+  fetchAccounts();
   console.log(`Example app listening on port ${port}`);
 });
