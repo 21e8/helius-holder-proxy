@@ -88,7 +88,7 @@ const findHolders = async (address) => {
     return allOwners.size;
   } catch (error) {
     console.error(error);
-    return holders[key];
+    // return holders[address];
   }
 };
 
